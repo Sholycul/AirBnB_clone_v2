@@ -10,13 +10,28 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage"""
-        if cls != None:
-            data_dict = {}
-            for key, value in self.__objects.items():
-                if cls == value.__class__ or cls == value.__class__.__name__:
-                    data_dict[key] = value
-            return data_dict
-        return self.__objects
+        from models.base_model import BaseModel
+        from models.user import User
+        from models.place import Place
+        from models.state import State
+        from models.city import City
+        from models.amenity import Amenity
+        from models.review import Review
+
+        classes = {
+                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
+                    'State': State, 'City': City, 'Amenity': Amenity,
+                    'Review': Review
+                  }
+
+        if cls in classes.values():
+            result = {}
+            for key, value in FileStorage.__objects.items():
+                if isinstance(value, cls):
+                    result.update({key: value})
+            return result
+        else:
+            return FileStorage.__objects
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -51,13 +66,26 @@ class FileStorage:
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
-                        self.all()[key] = classes[val['__class__']](**val)
+                    self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
 
     def delete(self, obj=None):
-        """delete obj from __objects if it’s inside"""
-        if obj is not None:
-            key = obj.__class__.__name__ + '.' + obj.id
-            if key in self.__objects:
-                del self.__objects[key]
+        """Deletes and obj from __objects if present"""
+        if obj:
+            del self.all()[obj.to_dict()['__class__'] + '.' + obj.id]
+
+    def cities(self, state_id=None):
+        """Returns a list of cities with the given state_id"""
+        from models.state import State
+        from models.city import City
+
+        cities = []
+        for key, obj in self.__objects.items():
+            if isinstance(obj, City) and obj.state_id == state_id:
+                cities.append(obj)
+        return cities
+
+    def close(self):
+        """Call reload() method for deserializing the JSON file to objects"""
+        self.reload()
