@@ -11,6 +11,7 @@ env.hosts = ['54.227.161.229', '100.26.175.56']
 env.user = 'ubuntu'
 env.key_filename = '~/.ssh/school'
 
+
 def do_deploy(archive_path):
     """distributes an archive to the web servers"""
     if exists(archive_path) is False:
@@ -28,5 +29,5 @@ def do_deploy(archive_path):
         run('rm -rf /data/web_static/current')
         run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
         return True
-    except:
+    except Exception:
         return False
