@@ -8,9 +8,17 @@ app = Flask(__name__)
 @app.route('/', strict_slashes=False)
 def hello():
     """
-    This page displays Hello HBNB
+    This hello HBNB home page
     """
     return "Hello HBNB!"
+
+
+@app.route('/hbnb', strict_slashes=False)
+def hbnb_page():
+    """
+    This page displays HBNB
+    """
+    return "HBNB"
 
 
 if __name__ == "__main__":
